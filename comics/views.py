@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.views import APIView
 
-from .models import Comic
-from .serializers import ComicSerializer
-from .utils import AsuraCatalog
+from .models import Chapter, Comic
+from .serializers import ComicSerializer, ComicWithCapsSerializer
+from .utils import AsuraCatalog, AsuraChapter
 
 # Create your views here.
 
@@ -22,7 +22,7 @@ from .utils import AsuraCatalog
 class RetriveComicView(generics.RetrieveAPIView):
     queryset = Comic.objects.all()
     renderer_classes = [JSONRenderer]
-    serializer_class = ComicSerializer
+    serializer_class = ComicWithCapsSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
@@ -34,3 +34,16 @@ class ComicListView(generics.ListAPIView):
     def get_queryset(self):
         title = self.request.query_params.get('title', '')
         return Comic.objects.filter(title__icontains=title)
+
+class ChapterImages(generics.RetrieveAPIView):
+    queryset = Chapter.objects.all()
+    renderer_classes = [JSONRenderer]
+    # serializer_class = ComicWithCapsSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    
+    def get(self, request, *args, **kwargs):
+        chapter = self.get_object()
+        if chapter:
+            images_links =  AsuraChapter(chapter.link).get_chapters_images()
+        
+        return Response(images_links, status=status.HTTP_200_OK)

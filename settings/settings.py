@@ -83,6 +83,10 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 100
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

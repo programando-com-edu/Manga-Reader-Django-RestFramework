@@ -101,3 +101,20 @@ class AsuraContent:
 
         else:
             print('Erro ao acessar a URL. Código de status: ', response.status_code)
+            
+class AsuraChapter:
+    def __init__(self, url):
+        self.url = url
+    
+    def get_chapters_images(self):
+        response = requests.get(self.url)
+        
+        if response.status_code == 200:
+            html_content = response.text
+            soup = BeautifulSoup(html_content, 'html.parser')
+            
+            try:
+                images = soup.find_all('img')
+                return  [image.get('src', '') for image in images]
+            except Exception as e:
+                print(e)
