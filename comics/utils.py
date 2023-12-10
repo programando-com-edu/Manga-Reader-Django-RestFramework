@@ -114,7 +114,7 @@ class AsuraChapter:
             soup = BeautifulSoup(html_content, 'html.parser')
             
             try:
-                images = soup.find_all('img')
-                return  [image.get('src', '') for image in images]
+                images = soup.find_all('img', {'decoding': 'async'})
+                return [image.get('src', '') for image in images]
             except Exception as e:
                 print(e)

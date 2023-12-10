@@ -33,17 +33,43 @@ class ComicListView(generics.ListAPIView):
 
     def get_queryset(self):
         title = self.request.query_params.get('title', '')
-        return Comic.objects.filter(title__icontains=title)
+        qs = Comic.objects.all()
+        if title and title != 'null':
+            qs = qs.filter(title__icontains=title)
+        return qs if title else qs[:30]
 
-class ChapterImages(generics.RetrieveAPIView):
+
+class ChapterView(generics.RetrieveAPIView):
     queryset = Chapter.objects.all()
     renderer_classes = [JSONRenderer]
-    # serializer_class = ComicWithCapsSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    
+
+    def get_images(self):
+        return AsuraChapter(self.object.link).get_chapters_images()
+
+    @staticmethod
+    def get_chapter(number, comic):
+        return Chapter.objects.filter(comic=comic, number=number).first()
+    def get_next_chapter(self):
+        chapter_num = str(int(self.object.number) + 1)
+        chapter = self.get_chapter(chapter_num, self.comic)
+        return chapter.pk if chapter else None
+
+    def get_previous_chapter(self):
+        chapter_num = str(int(self.object.number) - 1)
+        chapter = self.get_chapter(chapter_num, self.comic)
+        return chapter.pk if chapter else None
+
+    def build_data(self):
+        return {"next_chap": self.get_next_chapter(),
+                "prev_chap": self.get_previous_chapter(),
+                "images": self.get_images(),
+                "comic_id": self.comic.pk}
+
     def get(self, request, *args, **kwargs):
-        chapter = self.get_object()
+        self.object = self.get_object()
+        chapter = self.object
         if chapter:
-            images_links =  AsuraChapter(chapter.link).get_chapters_images()
-        
-        return Response(images_links, status=status.HTTP_200_OK)
+            self.comic = self.object.comic
+            return Response(self.build_data(), status=status.HTTP_200_OK)
+        return Response('', status=status.HTTP_404_NOT_FOUND)
