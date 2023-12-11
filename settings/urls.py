@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 import comics.urls
+import base.urls
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include(comics.urls))
+    path('', include(comics.urls)),
+    path('', include(base.urls))
+
 ]
