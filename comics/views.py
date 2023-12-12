@@ -44,12 +44,13 @@ class ChapterView(generics.RetrieveAPIView):
     renderer_classes = [JSONRenderer]
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get_images(self):
-        return AsuraChapter(self.object.link).get_chapters_images()
-
     @staticmethod
     def get_chapter(number, comic):
         return Chapter.objects.filter(comic=comic, number=number).first()
+
+    def get_images(self):
+        return AsuraChapter(self.object.link).get_chapters_images()
+    
     def get_next_chapter(self):
         chapter_num = str(int(self.object.number) + 1)
         chapter = self.get_chapter(chapter_num, self.comic)
@@ -68,8 +69,7 @@ class ChapterView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        chapter = self.object
-        if chapter:
+        if self.object:
             self.comic = self.object.comic
             return Response(self.build_data(), status=status.HTTP_200_OK)
         return Response('', status=status.HTTP_404_NOT_FOUND)

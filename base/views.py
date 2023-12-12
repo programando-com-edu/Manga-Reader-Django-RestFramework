@@ -15,15 +15,17 @@ class CreateUserView(CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     renderer_classes = [JSONRenderer]
-
+    
     def post(self, request, *arg, **kwargs):
         data = request.data
         password = data.get('password')
         username = data.get('username')
+        email = data.get('email')
         data.pop('username', None)
         data.pop('password', None)
+        data.pop('email', None)
 
-        user = User.objects.create_user(username, password, **data)
+        user = User.objects.create_user(username, email, password, **data)
         serialized_user = self.get_serializer(user)
 
         return Response(serialized_user.data, status=status.HTTP_201_CREATED)
