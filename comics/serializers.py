@@ -15,9 +15,11 @@ class ComicWithCapsSerializer(serializers.ModelSerializer):
     def get_chapters(self, obj):
         chapters = obj.chapter_set.all()
         return ChapterSerializer(chapters, many=True).data
+
     class Meta:
         model = Comic
         fields = '__all__'
+
 
 class ChapterSerializer(serializers.ModelSerializer):
     class Meta:
